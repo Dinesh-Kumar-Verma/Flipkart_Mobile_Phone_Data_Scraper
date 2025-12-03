@@ -4,6 +4,7 @@ from scraper.parser import parse_cards
 from scraper.pagination import get_next_page
 import pandas as pd
 from utils.cleaners import extract_all_specs
+from utils.paths import ensure_dirs
 from utils.logger import get_logger
 
 logger = get_logger("pipeline")
@@ -40,6 +41,9 @@ def run_pipeline(start_url):
         "Product Name", "Price", "Ratings & Reviews", "Star Rating", 
         "Camera", "Memory", "Battery", "Display"
     ])
+    
+    ensure_dirs(["./data/raw", "./data/processed"])
+
     
     df.to_csv("./data/raw/raw_flipkart_mobile_data.csv", index=False)
     logger.info("Exported final dataset to raw_flipkart_mobile_data.csv")
