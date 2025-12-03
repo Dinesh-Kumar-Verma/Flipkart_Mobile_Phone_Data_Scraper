@@ -2,6 +2,8 @@ import random, time
 from scraper.fetcher import get_soup
 from scraper.parser import parse_cards
 from scraper.pagination import get_next_page
+import pandas as pd
+from utils.cleaners import extract_all_specs
 from utils.logger import get_logger
 
 logger = get_logger("pipeline")
@@ -33,5 +35,17 @@ def run_pipeline(start_url):
         page += 1
         
         time.sleep(random.uniform(1.5, 3.0))
-
-    return all_rows
+        
+    df = pd.DataFrame(all_rows, columns=[
+        "Product Name", "Price", "Ratings & Reviews", "Star Rating", 
+        "Camera", "Memory", "Battery", "Display"
+    ])
+    
+    df.to_csv("./data/raw/raw_flipkart_mobile_data.csv", index=False)
+    logger.info("Exported final dataset to raw_flipkart_mobile_data.csv")
+    
+    clean_df =extract_all_specs(df)
+    clean_df.to_csv("./data/processed/clean_flipkart_mobile_data.csv", index=False)
+    logger.info("Exported final dataset to data/processed/clean_flipkart_mobile_data.csv")        
+        
+    return df, clean_df

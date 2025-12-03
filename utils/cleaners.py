@@ -1,5 +1,6 @@
 import re
 from utils.logger import get_logger
+import pandas as pd
 
 logger = get_logger("cleaners")
 
@@ -63,3 +64,31 @@ def extract_display(display_str):
     except Exception:
         logger.warning(f"Failed to extract display from: {display_str}")
         return None, None, None
+
+
+def extract_all_specs(df):
+    df["price"] = df["Price"].apply(extract_price)
+
+    df[["total_ratings", "total_reviews"]] = df["Ratings & Reviews"].apply(
+        lambda x: pd.Series(extract_ratings_reviews(x))
+    )
+
+    df[["rear_camera_mp", "front_camera_mp"]] = df["Camera"].apply(
+        lambda x: pd.Series(extract_camera(x))
+    )
+
+    df[["ram_gb", "rom_gb", "expandable_upto_gb"]] = df["Memory"].apply(
+        lambda x: pd.Series(extract_memory(x))
+    )
+
+    df["battery_mah"] = df["Battery"].apply(extract_battery)
+
+    df[["display_inch", "display_cm", "display_type"]] = df["Display"].apply(
+        lambda x: pd.Series(extract_display(x))
+    )
+    
+    df = df.rename(columns={"Product Name": "product_name"})
+    
+    df.drop(columns=["Price", "Ratings & Reviews", "Camera", "Memory", "Battery", "Display"], inplace=True)
+    
+    return df
